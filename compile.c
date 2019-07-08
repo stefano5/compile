@@ -62,9 +62,7 @@ void managementCommand(int index) {
         linkLibrary = 1;
     } else if (command[index][0] == '-' && command[index][1] == 'a' &&  command[index][2] == 'l' && command[index][3] == '=') {     //Linka librerie esterne
         subString(command[index], 4, strlen(command[index]));
-        if (addLibrary(command[index]) == TRUE);
-        printf("Libreria aggiunta\n");
-        exit(EXIT_SUCCESS);
+        exit (addLibrary(command[index]));
     } else if (command[index][0] == '-' && command[index][1] == 'D' && command[index][2] == '=') {      //Attiva macro
         subString(command[index], 3, strlen(command[index]));
         addMacro(command[index]);

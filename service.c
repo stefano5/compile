@@ -62,7 +62,7 @@ int addLibrary(char *param) {
             printf("The library '%s' already exist\n", param);
         else 
             printf("La libreria '%s' esiste gia'\n", param);
-        return EXIT_SUCCESS;
+        return EXIT_FAILURE;
     }
     char user[32];
     char path[64];
@@ -71,10 +71,10 @@ int addLibrary(char *param) {
     getUserId(user, TRUE);
     sprintf(path, PATH_FILE_LIBRARY, user);
 
-    if (param[0] == '-' && param[1] == 'l') {
+    if (param[0] == '-' && param[1] == 'l') {    //Da versione 3 e superiore questa condizione non è più verificabile
         //ho scritto, ad esempio, -lpthread quindi sono stato bravo e metto tutto nel file
         sprintf(lib , "%s %s", lib, param);
-    } else if (param[0] != '0' && param[1] != 'l') {    //Da versione 3 e superiore questa condizione non è più verificabile        TODO c'è stato un errore
+    } else if (param[0] != 'l') {
         sprintf(lib, "%s -l%s", lib, param);
     } else {
         if (language == ENGLISH)
