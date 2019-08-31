@@ -6,6 +6,7 @@
 #include "build_command.c"
 #include "service.c"
 #include "user_interaction.c"
+#include "ia.c"
 
 //             output input     input          input        input    input      input
 //                ^     ^         ^              ^            ^        ^         ^
@@ -68,10 +69,10 @@ void managementCommand(int index) {
         addMacro(command[index]);
     } else if (!strcmp(command[index], "--clear-register")) {
         removeRegister();
-        printf("Registro compilazioni svuotato\n");
+        notifyFlushRegister();
         exit(EXIT_SUCCESS);
     } else if (!strcmp(command[index], "--view-register")) {
-        printf("Verrà usato il tuo editor predefinito. Se vuoi cambiarlo passami il parametro '--change-editor'\n");
+        notifyEditor();
         viewRegister();
         exit(EXIT_SUCCESS);
     } else if (!strcmp(command[index], "--change-editor")) {
@@ -88,6 +89,8 @@ void managementCommand(int index) {
     } else if (!strcmp(command[index], "-r") || !strcmp(command[index], "--reset-library")) {
         resetLibrary(); 
         exit(EXIT_SUCCESS);
+    } else if (!strcmp(command[index], "-na") || !strcmp(command[index], "-nae")|| !strcmp(command[index], "--no-autoexe")|| !strcmp(command[index], "--no-auto-exe")) {
+        enableAutoExe = FALSE;
     } else {
         abortProgramm(command[index]);
         if (debug())
@@ -287,15 +290,15 @@ int main(int argc, char **argv) {
     if (debug()) printf("Mi arriva '%s'\n", fileToCompile);
     char *type = (char*)memchr(fileToCompile, '.', strlen(fileToCompile));           	//substring su file_da_compialare sul '.'
     if (type == NULL || !strcmp(type,".")) {
+        initArray_str(cmd, 1025);
         if (language == ENGLISH)
-            printf("[ERROR] The given file [%s] is not a supported source file.\n", fileToCompile);
+            sprintf(cmd, "The given file [%s] is not a supported source file.\n", fileToCompile);
         else 
-            printf("[ERROR] Il file passato [%s] non e' un file sorgente supportato.\n", fileToCompile);
+            sprintf(cmd, "Il file passato [%s] non e' un file sorgente supportato.\n", fileToCompile);
+        abortMessage(cmd);
         exit(EXIT_FAILURE);	
     } else if (!strcmp(type, ".*") && forceCompilation == 1) {
-        setColor(PRINT_MAGENTA);
-        printf("[WARNING] Hai usato il parametro -f che e' cattivo, spietato e anche un po' stupido.\n");
-        resetColor();
+        warningMessage("Hai usato il parametro -f che e' cattivo, spietato e anche un po' stupido.\n");
     }
 
     if (countParam < 2) {
@@ -322,12 +325,21 @@ int main(int argc, char **argv) {
         free(type);
     }
     free(fileToCompile);
-    free(nameExe);
     
     if (dummiesMode() && resultCompilation == TRUE) successMessage("Compilation done\n");
 
-    if (resultCompilation == TRUE) exit(EXIT_SUCCESS);
-    setColor(PRINT_RED);
+    if (resultCompilation == TRUE) {
+        if (iaIsEnable() && autoExeSw(nameExe) == TRUE && autoExeIsEnable()) {
+            if (fork() == 0) {
+                notifyAutoExe();
+                int exitState = runAutomatic(nameExe);
+                exit (exitState);
+            }
+        }
+        free(nameExe);
+        exit(EXIT_SUCCESS);
+    }
+    free(nameExe);
     BEGIN_PRINT_RED"Compilation failed\n"END_PRINT;
     exit(EXIT_FAILURE);
 }
