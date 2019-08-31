@@ -3,11 +3,12 @@
 
 #define PATH_FILE_LIBRARY           "/home/%s/.compile_lib.txt"
 #define INIT_LIBRARY                "-lpthread -lm -lrt"
-#define INITIALIZE_STATE_SERVICE    "ttt"                       /*yes view generate command | advanced mode | yes english package*/
+#define INITIALIZE_STATE_SERVICE    "tttt"                       /*yes view generate command | advanced mode | yes english package | yes ia  */
 #define ITALIAN                     1
 #define ENGLISH                     2
-#define VERSION                     "V. 5.1 KNIGHTS"            /*old version are not available*/
-#define DISABLE_JAVA                ".java------SUPPORT_FINISHED"    /*support for java source is finished, if you would try to use remove '-SUPPORT_FINISHED'. Use is ABSOLUTELY NO WARRANTY*/
+#define VERSION                     "V. 5.2 KNIGHTS IA"            /*old version are not available*/
+
+#define DISABLE_JAVA                ".java"    /*support for java source is finished, if you would try to use remove '-SUPPORT_FINISHED'. Use is ABSOLUTELY NO WARRANTY*/
 
 /*
  * Globale variable
@@ -22,6 +23,7 @@ int     enableCompilationAttempts = TRUE;
 char    macro[256];
 int     resultCompilation  = FALSE;
 int     language = ENGLISH;
+int     enableAutoExe = TRUE;
 
 
 /*
