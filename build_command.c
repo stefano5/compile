@@ -22,29 +22,6 @@ void addMacro(char *mcr) {
     sprintf(macro, "%s -D%s ", macro, mcr);
 }
 
-int managementModifySetting(char *command) {
-    if (!strcasecmp(command, "--show-command")){
-        setFileSystem(0, 't');
-        return EXIT_SUCCESS;
-    } else if (!strcasecmp(command, "--hide-command")) {
-        setFileSystem(0, 'f');
-        return EXIT_SUCCESS;
-    //} else if (!strcasecmp(command, "--dummies-mode")){
-    } else if (!strcasecmp(command, "--advanced-mode")){
-        setFileSystem(1, 't');
-        exit(EXIT_SUCCESS);
-        return EXIT_SUCCESS;
-    } else if (!strcasecmp(command, "--normal-mode")) {
-        setFileSystem(1, 'f');
-        return EXIT_SUCCESS;
-    } else if (!strcmp(command, "--select-language")) {
-        setLanguage();
-        return EXIT_SUCCESS;
-    }
-    printf("Errore di sintassi. Dopo '--set' deve seguire un altro comando noto. Usa il parametro -h per info \n");
-    return EXIT_FAILURE;
-}
-
 void assign_name(char *name_file, char *name_output){
     for (int i=0; name_file[i]!='.'; i++) {
         name_output[i]=name_file[i];
@@ -99,7 +76,7 @@ void writeIntoFileCommand(char *cmd) {
 
     sprintf(path, "/home/%s/.compile_lastCommand.txt", user);
 
-    sprintf(text, "%s \t\tgenerated at: %s\t\ton%s\n", cmd, getTime(), cwd);
+    sprintf(text, "%s \t\tgenerated at: %s\t\ton %s\n", cmd, getTime(), cwd);
 
     writeFile(path, text, "a+");
 
