@@ -52,6 +52,9 @@ void print_syntax(char **argv) {
                 "\t--set --normal-mode      rimuovi modalita' advanced\n"
                 "\n"
                 "\t--set --select-language  scegli quale lingua usare (EN/ITA)\n"
+                "\n"
+                "\t--set --ia-on            attiva intelligenza artificiale\n"
+                "\t--set --ia-off           disattiva intelligenza artificiale\n"
                 "\n\n"
                 "NOTE:      i ");
         BEGIN_PRINT_BLUE"comandi colorati in blu"END_PRINT; 
@@ -103,6 +106,9 @@ void print_syntax(char **argv) {
                 "\t--set --normal-mode      remove advanced mode \n"
                 "\n"
                 "\t--set --select-language  choose which one langage to use (EN/ITA)\n"
+                "\n"
+                "\t--set --ia-on            activates artificial intelligence\n"
+                "\t--set --ia-off           deactive artificiale intelligence\n"
                 "\n\n"
                 "NOTE:      the ");
         BEGIN_PRINT_BLUE"blue colored commands"END_PRINT; 
@@ -310,10 +316,46 @@ int setLanguage() {
         printf("Ok daje\n");
         return EXIT_SUCCESS;
     } else {
-        if (language == ENGLISH) printf("[Error] insert only '1' or '2'\n");
-        else printf("[Error] Inserisci solo o '1' o '2'\n");
+        if (language == ENGLISH) errorMessage("Insert only '1' or '2'\n");
+        else errorMessage("Inserisci solo o '1' o '2'\n");
         return EXIT_FAILURE;
     }
+}
+
+void notifyAutoExe() {
+    printf("##########################################\n\n");
+    if (language == ENGLISH) {
+        warningMessage("AUTO EXE SERVICE IS ENABLE\n");
+    } else {
+        warningMessage("IL SERVIZIO AUTO EXE E' ATTIVO\n");
+    }
+    printf("\n##########################################\n\n");
+}
+
+int autoExeIsEnable() {
+    if (enableAutoExe == FALSE) {
+        if (language == ENGLISH)
+            warningMessage("Autoexe service is temporaney disabled\n");
+        else 
+            warningMessage("Il servizio autoexe e' temporaneamente disattivato\n");
+        return FALSE;
+    } 
+    return TRUE;
+}
+
+void notifyEditor() {
+    if (language == ENGLISH) 
+        printf("Will be uesd your defualt editor. If you want change it, give me --change-editor parameter\n");
+    else
+        printf("Verrà usato il tuo editor predefinito. Se vuoi cambiarlo passami il parametro '--change-editor'\n");
+}
+
+void notifyFlushRegister() {
+    if (language == ENGLISH) 
+        printf("Register cleaner\n");       //TODO  traduzione corretta?
+    else
+        printf("Registro compilazioni svuotato\n");
+
 }
 
 #endif
