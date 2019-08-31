@@ -9,12 +9,45 @@
 //     'f' : false  servizio disattivato
 //
 // Al momento abbiamo:
-// fft
-// 123
+// fftt
+// 1234
 //
 // 1: mostra a video il comando generato (t=si, f=no)
 // 2: attiva modalità dummies (t=si, f=no)
 // 3: usa programma in inglese (t=si, f=no=>quindi in italiano)
+// 4: abilita intelligenza di compile
+
+
+int managementModifySetting(char *command) {
+    if (!strcasecmp(command, "--show-command")){
+        setFileSystem(0, 't');
+        return EXIT_SUCCESS;
+    } else if (!strcasecmp(command, "--hide-command")) {
+        setFileSystem(0, 'f');
+        return EXIT_SUCCESS;
+    //} else if (!strcasecmp(command, "--dummies-mode")){
+    } else if (!strcasecmp(command, "--advanced-mode")){
+        setFileSystem(1, 't');
+        exit(EXIT_SUCCESS);
+        return EXIT_SUCCESS;
+    } else if (!strcasecmp(command, "--normal-mode")) {
+        setFileSystem(1, 'f');
+        return EXIT_SUCCESS;
+    } else if (!strcmp(command, "--select-language")) {
+        setLanguage();
+        return EXIT_SUCCESS;
+    } else if (!strcmp(command, "--ia-on") || !strcmp(command, "--enable-intelligence")) {
+        setFileSystem(3, 't'); 
+        return EXIT_SUCCESS;
+    } else if (!strcmp(command, "--ia-off") || !strcmp(command, "--disable-intelligence")) {
+        setFileSystem(3, 'f');
+        return EXIT_SUCCESS;
+    }
+    printf("Errore di sintassi. Dopo '--set' deve seguire un altro comando noto. Usa il parametro -h per info \n");
+    return EXIT_FAILURE;
+}
+
+
 
 int fileSystemCorrupt(char *setting, FILE *f) {
     char user[32];
@@ -25,6 +58,9 @@ int fileSystemCorrupt(char *setting, FILE *f) {
         fclose(f);
         writeFile(path, INITIALIZE_STATE_SERVICE, "w");
         f=fopen(path, "r");
+        errorMessage("File system is corrupt. Bug detected :(\n");
+        printf("setting: <%s>\n", setting);
+        printf("INIT: <%s>\n", INITIALIZE_STATE_SERVICE);
         return TRUE;
     }
     return FALSE;
@@ -226,22 +262,25 @@ void viewServiceState(int force) {
         } else {
             char service[12];
             initArray_str(service, 12);
-            fscanf(f, "%c%c%c", &service[0], &service[1], &service[2]);
+            fscanf(f, "%c%c%c%c", &service[0], &service[1], &service[2], &service[3]);
             if (fileSystemCorrupt(service, f) == TRUE) 
-                fscanf(f, "%c%c%c", &service[0], &service[1], &service[2]);
+                fscanf(f, "%c%c%c%c", &service[0], &service[1], &service[2], &service[3]);                                                       //QUI MODIFICHE AL FILE SYSTEM PER I SERVIZI
             fclose(f);
             printf("\t\tThis is '%s'                    Version: %s\n", p[0], VERSION);
             printf("\t\t+-------------------------------------------------------------+\n");
             printf("\t\t|        View status of services                              |\n");
             printf("\t\t|                                                             |\n");
 
-            for (int i=0; i<3; i++) {
+            for (int i=0; i<4; i++) {
                 if (i==0)
-                    printf("\t\t| View generated command: ");
+                    printf("\t\t| View generated command:  ");
                 if (i == 1) 
-                    printf("\t\t| Advanced mode:          ");
+                    printf("\t\t| Advanced mode:           ");
                 else if (i == 2) 
-                    printf("\t\t| Use english package:    ");
+                    printf("\t\t| Use english package:     ");
+                else if (i == 3) 
+                    printf("\t\t| Artificial intelligence: ");
+
 
                 if (service[i] == 't') {
                     setColor(PRINT_GREEN);
@@ -252,7 +291,7 @@ void viewServiceState(int force) {
                     printf("disabled");
                     resetColor();
                 }
-                printf("                            |\n");
+                printf("                           |\n");
             }
             printf("\t\t|                                                             |\n");
             printf("\t\t+-------------------------------------------------------------+\n");
@@ -273,5 +312,46 @@ void resetLibrary() {
     else
         printf("Ripristino librerie salvate. Adesso sono: %s\n", INIT_LIBRARY);
 }
+
+/*
+ * Questa funzione è eseguita solo dal processo figlio
+*/
+int runAutomatic(char *nameExe) {
+    char commandExe[128];
+    initArray_str(commandExe, 128);
+    sprintf(commandExe, "echo \"\" && ./%s && touch .success_child", nameExe);
+    system(commandExe);
+    if (existFile(".success_child") == TRUE) successMessage("Child success");
+    else errorMessage("Child failed");
+    removeFile(".success_child");
+    return (existFile(".success_child") == TRUE ? EXIT_SUCCESS : EXIT_FAILURE);
+
+}
+
+int iaIsEnable() {//se l'intelligenza è attivata torna true altrimenti false    
+    char user[32];
+    char path[64];
+    initArray_str(user, 32);
+    initArray_str(path, 64);
+    getUserId(user, TRUE);
+    sprintf(path, "/home/%s/.compile.txt", user);
+    FILE *f = fopen(path, "r");
+    if (f == NULL) {
+        writeFile(path, INITIALIZE_STATE_SERVICE, "w");
+        printf("[WARNING] Filesystem not initiliazed. (6) Try again to initialize \n");
+    } else {
+        char setting[12];
+        initArray_str(setting, 12);
+        fgets(setting, 12, f);
+        trim(setting);
+        if (fileSystemCorrupt(setting, f) == TRUE)
+            fgets(setting, 12, f);
+        fclose(f);
+
+        return setting[3] == 't';
+    }
+    return FALSE;
+}
+
 
 #endif
