@@ -42,11 +42,6 @@ sudo cp compile /bin/ > /dev/zero
 if [ -f /bin/compile ]; then
     echo "Compile is now ready"    
 else 
-    if [ $compilazione != 0 ]; then
-        echo "Compilation failed. Do you have all source file?"
-        exit 0;
-    fi
-    #echo "Compilazione fallita, la compilazione ha avuto successo ma il file non e' stato copiato su /bin/"
     echo "cp failed. Contact support please"
 fi
 
