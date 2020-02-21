@@ -1,6 +1,9 @@
 #ifndef SERVICE_C
 #define SERVICE_C
 
+#include <coloredMessage.c>
+
+
 // Path: /home/stefano/.compile.txt
 // Il file contiene lo stato dei servizi del programma 
 //
