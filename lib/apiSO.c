@@ -7,10 +7,10 @@
 #include    <pwd.h>
 #include    <unistd.h>
 
+#include    <coloredMessage.c>
 #include    <management_date.c>
 #include    <printColor.c>
 #include    <debug.c>
-#include    <coloredMessage.c>
 
 #define     TRUE      1
 #define     FALSE     0
