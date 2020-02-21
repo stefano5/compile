@@ -1,7 +1,17 @@
 #ifndef COLORED_MESSAGE_C
 #define COLORED_MESSAGE_C
 
+#include <stdio.h>
 #include <printColor.c>
+
+
+void errorMessage(const char *mex) {
+    printf("[");
+    setColor(PRINT_RED);
+    printf("Error");
+    resetColor();
+    printf("] %s", mex);
+}
 
 void abortMessage(const char *mex) {
     printf("[");
@@ -26,5 +36,4 @@ void warningMessage(const char *mex) {
     resetColor();
     printf("] %s", mex);
 }
-
 #endif
