@@ -35,13 +35,18 @@ if [ -f /bin/ia.c ]; then
 fi
 
 sudo cp -r lib/* /usr/include/
-gcc compile.c -o compile > /dev/zero
+gcc compile.c -o compile > /dev/null
 $compilazione=$?
-sudo cp compile /bin/ > /dev/zero
+sudo cp compile /bin/ > /dev/null
 
 if [ -f /bin/compile ]; then
     echo "Compile is now ready"    
 else 
+    if [ $compilazione != 0 ]; then
+        echo "Compilation failed. Do you have all source file?"
+        exit 0;
+    fi
+    #echo "Compilazione fallita, la compilazione ha avuto successo ma il file non e' stato copiato su /bin/"
     echo "cp failed. Contact support please"
 fi
 

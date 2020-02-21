@@ -11,7 +11,7 @@
 //             output input     input          input        input    input      input
 //                ^     ^         ^              ^            ^        ^         ^
 //create_command(cmd, argv, offset_param, compile_to_debug, type, name_output, macro);
-void create_command(char *cmd, char *fileToCompile, int compile_to_debug, char *type, char *name_output, char *library, char *macro) {
+static inline void create_command(char *cmd, char *fileToCompile, int compile_to_debug, char *type, char *name_output, char *library, char *macro) {
     initArray_str(cmd, 1024);
 
     if (debug()) printf("File: %s. Output: %s\n", fileToCompile, name_output);
@@ -90,7 +90,11 @@ void managementCommand(int index) {
         resetLibrary(); 
         exit(EXIT_SUCCESS);
     } else if (!strcmp(command[index], "-na") || !strcmp(command[index], "-nae")|| !strcmp(command[index], "--no-autoexe")|| !strcmp(command[index], "--no-auto-exe")) {
+        clearsCounter(PATH_COUNT_COMPILATION);
         enableAutoExe = FALSE;
+    } else if (!strcmp(command[index], "-R") || !strcmp(command[index], "--reset-ia")) {
+        clearsCounter(PATH_COUNT_COMPILATION);
+        exit(EXIT_SUCCESS);
     } else {
         abortProgramm(command[index]);
         if (debug())
@@ -101,10 +105,12 @@ void managementCommand(int index) {
 
 int compilationSuccessful() {
     if (existFile(".successful")) {
+        PRINT_IF_DEBUG_ON("File \".successful\" e' stato trovato => la compilazione ha avuto successo\n");
         resultCompilation = TRUE;
         removeFile(".successful");
         return TRUE;
     } else {
+        PRINT_IF_DEBUG_ON("File \".successful\" NON e' stato trovato => la compilazione ha fallito\n");
         resultCompilation = FALSE;
         return FALSE;
     }
@@ -114,16 +120,20 @@ int compilationSuccessful() {
 void runCommand(char *cmd, char *fileToCompile, int compile_to_debug, char *type, char *name_output, char *library, char *macro) {
     char command[1024];
     initArray_str(command, 1024);
-    sprintf(command, "%s && echo 1 > .successful", cmd);
+    sprintf(command, "%s && touch .successful", cmd);
     
     if (!enableCompilationAttempts || dummiesMode() == FALSE) {
         system(command);
+        if (debug()) 
+            printf("[1] Comando eseguito: [%s]\n", command);
         compilationSuccessful();
         return;
     }
 
     for (int i=0; i<4; i++) {
         system(command);
+        if (debug()) 
+            printf("[2] Comando eseguito: [%s]\n", command);
         if (compilationSuccessful()) {
             break;
         }
@@ -185,42 +195,69 @@ void managementArg() {
 //
 // gcc -Wall -Werror main.c other.c othe1.c ... othern.c -o -g main.c 
 //
-void tryToForce(char **fileToCompile, char **newTipe) {
+int tryToForce(char **fileToCompile, char **newTipe) {
     char mainFile[12];
     char othersFile[256];
     char *dumpType;
     char type[6];
+    int mainFounded = 0;
     initArray_str(mainFile, 12);
     initArray_str(othersFile, 256);
     initArray_str(mainFile, 12);
-
+//vediamo tra i file presenti quali hanno dei main
     read_directory(".");
-
-    for (int i=0; i< Directory.n_file; i++) {
+    for (int i=0; i < Directory.n_file; i++) {
         dumpType = (char*)memchr(Directory.name[i], '.', strlen(Directory.name[i]));            //substring al '.'
         if (dumpType == NULL || !strcmp(dumpType, DISABLE_JAVA)) continue;
         if (!strcmp(dumpType, ".c") || !strcmp(dumpType, ".c++") || !strcmp(dumpType, ".cpp") || !strcmp(dumpType, ".cc")) {
-            if (strstr(Directory.name[i], "main") != NULL) {
-                printf("Main rilevato\n");
+            if (containMainFunction(Directory.name[i])) {
+                printf("File con main rilevato trovato: %s\n", Directory.name[i]);
                 strcpy(mainFile, Directory.name[i]);
                 strcpy(type, dumpType);
-                break;
+                mainFounded++;
             }
         }
     }
+    
+    switch (mainFounded) {
+        case 1:
+            //ok
+            free(*fileToCompile);
+            *fileToCompile = (char*)malloc(strlen(mainFile) + 1 + 5); //il + 5 è perche aggiungiamo: '*.c++'
+            strcpy(*fileToCompile, mainFile);
 
-    if (strlen(mainFile) > 0) {
-        free(*fileToCompile);
-        *fileToCompile = (char*)malloc(strlen(mainFile) + 1 + 4); //il + 4 è perche aggiungiamo: ' *.c'
-        strcpy(*fileToCompile, mainFile);
+            *newTipe = (char*)malloc(strlen(type) + 1);
+            strcpy(*newTipe, type);
+            
+            sprintf(*fileToCompile, "%s ", mainFile);
+            
+            //printf("Tipo salvato:%s\n", *newTipe);
+            
+            store_file_from_directory(".", *newTipe);
+            
+            for (int i=0; i< Directory.n_file; i++) {
+                //printf("file: %s\n", Directory.name[i]);
+                if (!strcmp(Directory.name[i], mainFile)) continue;
+                sprintf(*fileToCompile, "%s %s", *fileToCompile, Directory.name[i]);
+            }
+            return TRUE;
+        case 0:
+            //nessun file compatibile
+            if (language == ENGLISH)
+                errorMessage("No one main founded in this directory. No one attemption is possible. -f parameter has been ignored\n");
+            else 
+                errorMessage("Non esiste un main in questa directory. Nessun tentativo di forzatura possibile. Il parametro '-f' e' stato ignorato\n");
+            forceCompilation = 0;
+            return FALSE;
+        default:
+            //troppi file compatibili
 
-        *newTipe = (char*)malloc(strlen(type) + 1);
-        strcpy(*newTipe, type);
-
-        sprintf(*fileToCompile, "%s *%s", *fileToCompile, type);
-    } else {
-        printf("Non esiste un main in questa directory. Nessun tentativo di forzatura possibile. Il parametro '-f' e' stato ignorato\n");
-        forceCompilation = 0;
+            if (language == ENGLISH)
+                errorMessage("Too many compatible files. -f parametro has been ignored\n");
+            else 
+                errorMessage("Troppi file compatibili. Ignoro il parametro -f\n");
+            forceCompilation = 0;
+            return FALSE;
     }
 }
 
@@ -255,13 +292,14 @@ int main(int argc, char **argv) {
             free(uniqueFile);
         } else if (number_file == 0) {
             if (language == ENGLISH)
-                printf("No supported file is present in this directory\n");
+                errorMessage("No supported file is present in this directory\n");
             else 
-                printf("Nessun file supportato presente in questa directory\n");
+                errorMessage("Nessun file supportato presente in questa directory\n");
             exit(EXIT_FAILURE);
         } else {
             if (forceCompilation == 0) {
                 if (count_compatible_file(&fileToCompile) == 1) {
+                    PRINT_IF_DEBUG_ON("\t\t\te riconosco che e' l'unico file che contiene un main => lo scelgo\n");
                     warningMessage("One compatible file detected\n");
                 } else {
                     if (language == ENGLISH) {
@@ -278,7 +316,7 @@ int main(int argc, char **argv) {
             }
         }
     } else {
-        if (forceCompilation == 0) {
+        if (forceCompilation == 0) { //come discrimino le directory dai file qui?
             fileToCompile = (char*)malloc(strlen(param[0]) + 1);
             strcpy(fileToCompile, param[0]); 
         } else {
@@ -288,9 +326,9 @@ int main(int argc, char **argv) {
     }
 
     if (debug()) printf("Mi arriva '%s'\n", fileToCompile);
-    char *type = (char*)memchr(fileToCompile, '.', strlen(fileToCompile));           	//substring su file_da_compialare sul '.'
+    char *type = (char*)memchr(fileToCompile, '.', strlen(fileToCompile));           	//substring su file_to_compile sul '.'
     if (type == NULL || !strcmp(type,".")) {
-        initArray_str(cmd, 1025);
+        initArray_str(cmd, 1024);
         if (language == ENGLISH)
             sprintf(cmd, "The given file [%s] is not a supported source file.\n", fileToCompile);
         else 
@@ -302,35 +340,38 @@ int main(int argc, char **argv) {
     }
 
     if (countParam < 2) {
-        printf_d("Nome output di default\n");
+        PRINT_IF_DEBUG_ON("Nome output di default\n");
         nameExe = (char*)malloc(strlen(fileToCompile) + 1);
         initArray_str(nameExe, strlen(fileToCompile) + 1);
         assign_name(fileToCompile, nameExe);
-        if (debug()) printf("\tOvvero: %s\n", fileToCompile);
+        PRINT_IF_DEBUG_ON("\tOvvero: %s\n", fileToCompile);
     } else {
-        if (debug())printf("Nome output scelto: %s\n", param[1]);
+        if (debug()) printf("Nome output scelto da user: %s\n", param[1]);
+        PRINT_IF_DEBUG_ON("Ho %d parametri\n", countParam);
         nameExe = (char*)malloc(strlen(param[1]) + 1);
         initArray_str(nameExe, strlen(param[1]) + 1);
         strcpy(nameExe, param[1]);
     }
 
-    if (forceCompilation) {
-        tryToForce(&fileToCompile, &type);
+    if (forceCompilation == 1) {
+        if (tryToForce(&fileToCompile, &type) == FALSE) {
+            free(fileToCompile);
+            free(nameExe);
+            errorMessage("Failed by force compilation. Please do not use me in this case\n");
+            exit(EXIT_FAILURE);
+        }
     }
 
     create_command(cmd, fileToCompile, compile_to_debug, type, nameExe, library, macro); 
     runCommand(cmd, fileToCompile, compile_to_debug, type, nameExe, library, macro); 
 
-    if (forceCompilation) {
-        free(type);
-    }
     free(fileToCompile);
-    
+
     if (dummiesMode() && resultCompilation == TRUE) successMessage("Compilation done\n");
 
     if (resultCompilation == TRUE) {
         if (iaIsEnable() && autoExeSw(nameExe) == TRUE && autoExeIsEnable()) {
-            if (fork() == 0) {
+            if (fork() == 0) {  //istanza figlio
                 notifyAutoExe();
                 int exitState = runAutomatic(nameExe);
                 exit (exitState);
@@ -340,6 +381,6 @@ int main(int argc, char **argv) {
         exit(EXIT_SUCCESS);
     }
     free(nameExe);
-    BEGIN_PRINT_RED"Compilation failed\n"END_PRINT;
+    errorMessage("Compilation failed\n");
     exit(EXIT_FAILURE);
 }

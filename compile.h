@@ -6,9 +6,10 @@
 #define INITIALIZE_STATE_SERVICE    "tttt"                       /*yes view generate command | advanced mode | yes english package | yes ia  */
 #define ITALIAN                     1
 #define ENGLISH                     2
-#define VERSION                     "V. 5.2 KNIGHTS IA"            /*old version are not available*/
+#define VERSION                     "V. 5.4 KNIGHTS IA "            /*old version are not available*/
 
-#define DISABLE_JAVA                ".java"    /*support for java source is finished, if you would try to use remove '-SUPPORT_FINISHED'. Use is ABSOLUTELY NO WARRANTY*/
+#define DISABLE_JAVA                ".java-SUPPORT_FINISHED"
+//#define DISABLE_JAVA                ".java"    /*support for java source is finished, if you would try to use remove '-SUPPORT_FINISHED'. Use is ABSOLUTELY NO WARRANTY*/
 
 /*
  * Globale variable
@@ -29,12 +30,13 @@ int     enableAutoExe = TRUE;
 /*
  * Prototype
 */
-void    create_command(char *cmd, char *fileToCompile, int compile_to_debug, char *type, char *name_output, char *library, char *macro);
+static inline void create_command(char *cmd, char *fileToCompile, int compile_to_debug, char *type, char *name_output, char *library, char *macro) __attribute__((always_inline));
+
 void    managementCommand(int index);
 int     compilationSuccessful();
 void    runCommand(char *cmd, char *fileToCompile, int compile_to_debug, char *type, char *name_output, char *library, char *macro);
 void    managementArg();
-void    tryToForce(char **fileToCompile, char **newTipe);
+int     tryToForce(char **fileToCompile, char **newTipe);
 void    readLibrary(char *lib, int dim);
 int     addLibrary(char *param);
 void    addMacro(char *mcr);

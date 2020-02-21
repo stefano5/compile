@@ -1,29 +1,62 @@
-#ifndef __DEBUG
-#define __DEBUG
+#ifndef __DEBUG_FILE_STE
+#define __DEBUG_FILE_STE
 
 #include    <stdio.h>
-#include    <printColor.c> 
+#include    <apiSO.c>
+#include    <printColor.c>
 
-int __debug=0;
-void printf_d(char *s){
-    if (__debug)
+#define PRINT_IF_DEBUG_ON if(debug()) printf
+
+
+int __debug=FALSE;
+int debug() { 
+    return __debug;
+}
+
+void printf_d(char *s) {
+#ifdef _DEBUG_
+    printf("%s\n", s);
+#else
+    if (debug())
         printf("%s\n", s);
+#endif
 }
 
-void debug_on(){
-    setColor(PRINT_YELLOW);
-    printf("[MODALITA' DEBUG: ON]\n");
+void debug_on() {
+#ifdef _DEBUG_
+    setColor(PRINT_CYAN);
+    printf("[MODALITA' DEBUG: FORCED ON]");
     resetColor();
-    __debug=1;
-}
-
-void debug_off(){
+    printf("\n");
+    __debug=TRUE;
+#else
     setColor(PRINT_YELLOW);
-    printf("[MODALITA' DEBUG: OFF]\n");
+    printf("[MODALITA' DEBUG: ON]");
     resetColor();
-    __debug=0;
+    printf("\n");
+    __debug=TRUE;
+#endif
 }
 
-int debug() { return __debug; }
+void debug_off() {
+#ifdef _DEBUG_
+    setColor(PRINT_CYAN);
+    printf("[MODALITA' DEBUG: IS FORCED ON] recompile without _DEBUG_ macro");
+    resetColor();
+    printf("\n");
+#else
+    setColor(PRINT_YELLOW);
+    printf("[MODALITA' DEBUG: OFF]");
+    resetColor();
+    printf("\n");
+    __debug=FALSE;
+#endif
+}
+
+void active_debug_FOR_EACH() {
+    if (getuid() == 0) {
+        //to do
+    }
+}
 
 #endif

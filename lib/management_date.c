@@ -1,34 +1,27 @@
-//#define DEBUG             //Per compilare il main
-
-
 #ifndef __MANAGEMENT_DATE
 #define __MANAGEMENT_DATE
-
-#if defined(DEBUG) 
-    #include <function.h>
-#endif
 
 #include    <stdio.h>
 #include    <stdlib.h>
 #include    <time.h>
-#include    "management_string.c"
+#include    <management_string.c>
 
 
-char* getTime(){
+char* getTime() { 
     time_t mytime;
     mytime = time(NULL);
     return trim(ctime(&mytime));
 }
 
-char* getHours(){
-    char *hours=(char*)malloc(6);
-    char *dump=getTime();
+char* getHours() {
+    char *hours = (char*)malloc(6);
+    char *dump = getTime();
     subString(dump, 11, 16);
     strcpy(hours, dump);
     return hours;
 }
 
-int* calculatesDifference(char *hourStart, char *hourEnd){
+int* calculatesDifference(char *hourStart, char *hourEnd) {
     if (strlen(hourStart)<5 || strlen(hourEnd)<5){
         printf("[%s->calculatesDifference] il parametro passato deve avere lunghezza fissa di 6 caratteri. Adesso avrai una violazione in memoria\n", __FILE__);
         printf("Start: >%s< strlen=%d\n", hourStart, (int)strlen(hourStart));
@@ -85,7 +78,7 @@ reCompute:
         }
     } else {
         if (mStart > mEnd) { 
-            printf("Tick\n");
+            //printf("Tick\n");
             hStart += 1;
             flag = 1;
             goto reCompute;
@@ -114,17 +107,4 @@ reCompute:
     ret[1] = countM;
     return ret;
 }
-
-#ifdef DEBUG
-#error "debug attivato"
-int main(void){
-    debug_on();
-    printf("ciao\n");
-    int *par=calculatesDifference("17:38", "07:27");
-    printf("Tempo passato: %d:%d\n", par[0], par[1]);
-    free(par);
-}
-#endif
-
-
 #endif

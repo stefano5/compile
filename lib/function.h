@@ -8,23 +8,25 @@
 #include    <stdbool.h>
 #include    <signal.h>
 
+#define     PRECONDITION    int i=0; i<
+#define     POSTCONDITION   ;i++
+
 #include    <printColor.c>
 #include    <apiSO.c>
 #include    <debug.c>
 #include    <management_date.c>
 #include    <management_string.c>
-
-
+#include    <coloredMessage.c>
 
 #define COMMAND     1
 #define PARAM       0
 
-#define CHAR    0
-#define INT     1
-#define FLOAT   2
-#define DOUBLE  3
-#define STRING  4
-#define VOID_GP 5
+#define CHAR        0
+#define INT         1
+#define FLOAT       2
+#define DOUBLE      3
+#define STRING      4
+#define VOID_GP     5
 
 /**
  *Struttura per passare ad una funzione una parametro generico. Esempio la funzione sotto
@@ -57,16 +59,21 @@ void print_number_v(variant v){
     }
 }
 
-
-
 void initArray_int(int *array, int dim, int init_value) {
     for (int i=0; i<dim; i++)
         array[i] = init_value;
 }
 
-#define MAX_NUMBER_COMMAND      24
-#define MAX_NUMBER_PARAM        24
-#define MAX_DIM_P_C             32
+void managementParam(int i);
+void managementCommand(int i);
+
+//#define MAX_NUMBER_COMMAND      24
+//#define MAX_NUMBER_PARAM        24
+//#define MAX_DIM_P_C             64
+
+#define MAX_NUMBER_COMMAND      2048
+#define MAX_NUMBER_PARAM        2048
+#define MAX_DIM_P_C             512
 
 /**
  * Questa funzione analizza i parametri inseritu su argv e li divide tra comandi e effettivi parametri
@@ -75,7 +82,7 @@ void initArray_int(int *array, int dim, int init_value) {
  *  -d          è un comando
  *  file.c      è un parametro
  *
- *  La funzione sotto salerà nella variabile    'param' tutti i parametri riconosciuti
+ *  La funzione sotto salverà nella variabile   'param' tutti i parametri riconosciuti
  *                                              'command' tutti i comandi riconosciuti
  * 
  */
@@ -83,6 +90,8 @@ char command[MAX_NUMBER_COMMAND][MAX_DIM_P_C];
 int countCommand;
 char param[MAX_NUMBER_PARAM][MAX_DIM_P_C];
 int countParam;
+char **__p;
+char name_exe[32];
 void analyzeArg(int argc, char **argv) { 
     countCommand = countParam = 0;
     if (argc > MAX_NUMBER_COMMAND + MAX_NUMBER_PARAM) {
@@ -105,8 +114,14 @@ void analyzeArg(int argc, char **argv) {
             strcpy(param[countParam++], argv[i]);
         }
     }
-    //__viewAllCommand();
-    //__viewAllParam();
+    __p = argv;
+    initArray_str(name_exe, 32);
+    subString(name_exe, 0, 32);
+    strcat(name_exe, argv[0]);
+#ifdef _DEBUG_
+    __viewAllCommand();
+    __viewAllParam();
+#endif
 }
 
 void __viewAllCommand() {
@@ -116,11 +131,10 @@ void __viewAllCommand() {
     printf("##################################\n\n");
 }
 
-
 void __viewAllParam() {
     printf("########## Parametri ############\n");
     for (int i=0; i< countParam; i++)
-        printf("#\t%s       at %d\n", param[i], i);
+        printf("#\t%s\n", param[i]);
     printf("##################################\n\n");
 }
 
@@ -131,8 +145,21 @@ float randomf() {
         srand((unsigned int)time(NULL));
         _isInitializeRandomf = true;
     }
+    //      Love shitcode
     return ((float)((rand()) % 10)) / (float)((rand() % 10) + 10.0);
 }
 
+
+void printWaiting(char *text, int timeToWait) {
+//text like:        "Waiting %d seconds, give me SIGINT if you want stop me.."
+        printf("\b");
+        for (int i=timeToWait; i>=0; i--) {
+            printf(text, i);
+            fflush(stdout);
+            sleep(1);
+            for (int j=0; j<strlen(text); j++) printf("\b");
+        }
+        printf("\n");
+}
 
 #endif

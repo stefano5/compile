@@ -41,6 +41,7 @@ void print_syntax(char **argv) {
         BEGIN_PRINT_BLUE"\t--view-service   -v"END_PRINT;
         printf("\t         vedi lo stato dei servizi\n"
 
+                "\t-R o --reset-ia          resetta intelligenza artificiale\n"
                 "\t-ol o --open-loop        compila in anello aperto, il software non controllera' la buona riuscita della compilazione e si limitera' ad utilizzare i parametri scelti dall'utente\n"
 
                 "\nMODALITA': \t\t(l'attivazione di un servizio e' permanente)\n"
@@ -87,8 +88,11 @@ void print_syntax(char **argv) {
                 "\t\t.\t %s -l\n"
                 "\t\t.  a command like this will be generated:\n"
                 "\t\t.\t gcc -Wall -Werror file.c -g -lpthread -o file\n"
-                "\t\t.  and you can then use the 'pthread' library correctly\n"
-                "\t-D=MACRO                 enable the macro named 'MACRO'\n", argv[0], argv[0]);
+                "\t\t.  and you can then use the 'pthread' library correctly\n", argv[0], argv[0]);
+        printf("\tif you link an incorrect library, you can use the following command to restore the filse system of the libraries by eliminating any insertion errors\n");
+        BEGIN_PRINT_BLUE"\t--reset-library   "END_PRINT;
+
+        printf("\t-D=MACRO                 enable the macro named 'MACRO'\n");
         BEGIN_PRINT_BLUE"\t--clear-register"END_PRINT;
                 printf("\t          clear compilation history\n");
         BEGIN_PRINT_BLUE"\t--view-register"END_PRINT;
@@ -96,6 +100,8 @@ void print_syntax(char **argv) {
         BEGIN_PRINT_BLUE"\t--change-editor"END_PRINT;
         printf(
                 "\t          change the default editor (root privileges required)\n"
+
+                "\t-R o --reset-ia          reset artificial intelligence\n"
                 "\t-ol o --open-loop        the software will not check the success of the compilation and therefore will use the parameters chosen by the user\n"
                 "\nMODALITY: \t\t(service activation is permanent). \n"
                 "\t\tNB: for each command shown below: NO ONE FILE WILL BE COMPILED!\n"
@@ -108,7 +114,7 @@ void print_syntax(char **argv) {
                 "\t--set --select-language  choose which one langage to use (EN/ITA)\n"
                 "\n"
                 "\t--set --ia-on            activates artificial intelligence\n"
-                "\t--set --ia-off           deactive artificiale intelligence\n"
+                "\t--set --ia-off           deactive artificial intelligence\n"
                 "\n\n"
                 "NOTE:      the ");
         BEGIN_PRINT_BLUE"blue colored commands"END_PRINT; 
@@ -161,22 +167,6 @@ void active_d() {
     compile_to_debug = 1;
 }
 
-int count_compatible_file(char **fileToCompile) {
-    int countCompatibleFile=0;
-    for (int i=0; i< Directory.n_file; i++) {
-        char *type =(char*)memchr(Directory.name[i], '.', strlen(Directory.name[i]));
-        if (type == NULL) continue;
-        if (!strcmp(type, ".c") || !strcmp(type, ".c++") || !strcmp(type, ".cpp") || !strcmp(type, DISABLE_JAVA) || !strcmp(type, ".cc")) {
-            if (containMainFunction(Directory.name[i])) {
-                *fileToCompile = (char*)malloc(strlen(Directory.name[i]) + 1);
-                initArray_str(*fileToCompile, strlen(Directory.name[i]) + 1);
-                strcpy(*fileToCompile, Directory.name[i]);
-                countCompatibleFile++;
-            }
-        }
-    }
-    return countCompatibleFile;
-}
 
 void show_source_file() {
     int countCorrectFormat=0;

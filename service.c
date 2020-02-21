@@ -1,9 +1,6 @@
 #ifndef SERVICE_C
 #define SERVICE_C
 
-#include <coloredMessage.c>
-
-
 // Path: /home/stefano/.compile.txt
 // Il file contiene lo stato dei servizi del programma 
 //
@@ -311,7 +308,7 @@ void resetLibrary() {
     sprintf(path, "/home/%s/.compile_lib.txt", user);
     writeFile(path, INIT_LIBRARY, "w");
     if (language == ENGLISH)
-        printf("Reset saved ibrary. Now are: '%s'", INIT_LIBRARY);
+        printf("Reset saved ibrary. Now are: '%s'\n", INIT_LIBRARY);
     else
         printf("Ripristino librerie salvate. Adesso sono: %s\n", INIT_LIBRARY);
 }

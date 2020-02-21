@@ -5,10 +5,31 @@
 #include    <string.h>
 #include    <stdlib.h>
 #include    <pwd.h>
+#include    <apiSO.c>
 #include    <assert.h>
 #include    <debug.c>
 
+#ifndef TRUE
+#pragma message "problema di incompatibilita', risolto con una pezza"
+#define     TRUE    1
+#define     FALSE   0
+#endif
+
+
+#ifndef PRECONDITION
+#define PRECONDITION int i=0; i<
+#define POSTCONDITION ;i++
+#endif
+
+
 #define FFLUSH while(getchar()!='\n') ;
+
+int isNumber(char *text) {
+    for (int i=0; i<strlen(text); i++) {
+        if (!(text[i] >= 48 && text[i]<=57)) return FALSE;
+    }
+    return TRUE;
+}
 
 char *ltrim(char *s){
     while(isspace(*s)) s++;
@@ -46,17 +67,18 @@ int subString(char *str, int start, int end) {
     if (start<0) start=0;
     if (end>len) {
         if (debug()){
-            printf("[%s->subString] Nothing to do. String %s have dim:%d, so the index %d (end index) don't exist\n", __FILE__, str, len, end, end);
-        } 
+            printf("[%s->subString] Nothing to do. String %s have dim:%d, so the index %d (end index) doesn't exist\n", __FILE__, str, len, end, end);
+        }
         return -1;
     }
     if (start > len || start > end) {
-        printf("[%s->subString] Error substring (size). str:%s--start:%d--end:%d--lenstr:%d\n", __FILE__, str, start, end, len);
+        if (debug()) printf("[%s->subString] Error substring (size). str:%s--start:%d--end:%d--lenstr:%d\n", __FILE__, str, start, end, len);
         return -1;
     }
-    char *str_temp = (char*)malloc(sizeof(char) * len);    //of course, sizeof(char) = 1, but to leggibility...
+    char *str_temp = (char*)malloc(len);
+    initArray_str(str_temp, len);
     int new_index=0;
-    for (int i=0;i<len; i++ ){
+    for (int i=0; i<len; i++ ){
         if(i>=start && i<end){
             str_temp[new_index++]=str[i];
         }
@@ -69,12 +91,24 @@ int subString(char *str, int start, int end) {
 
 
 
-void _lowerCase(char *str) {
-    //todo
+void lowerCase(char *str, int dim) {
+    for (PRECONDITION dim POSTCONDITION) {
+        if (str[i] >= 65 && str[i] <= 90)
+            str[i] += 32;
+    }
 }
 
-void _upperCaseFirstChar(char *str) {
-    //todo
+void upperCase(char *str, int dim) {
+    for (PRECONDITION dim POSTCONDITION) {
+        if (str[i] >= 97 && str[i] <= 122)
+            str[i] -= 32;
+    }
+}
+
+void upperCase_onlyfirstChar(char *str, int dim) {
+    lowerCase(str, dim);
+    if (str[0] >= 97 && str[0] <= 122)
+        str[0] -= 32;
 }
 
 char** str_split(char* a_str, const char a_delim) {

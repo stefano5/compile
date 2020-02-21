@@ -13,7 +13,7 @@
 void clearsCounter(char *nameFile);
 
 #define PATH_LAST_COMPILATED_FILE               "/home/%s/.lastCompilatedFile"              /*path file system*/
-#define MAXIMUM_TIME_FROM_LAST_COMPILATION      15                                          /*tempo massimo dall'ultima compilazione entro cui il software viene mandato in esecuzione*/
+#define MAXIMUM_TIME_FROM_LAST_COMPILATION      10                                          /*tempo massimo dall'ultima compilazione entro cui il software viene mandato in esecuzione*/
 #define PATH_COUNT_COMPILATION                  ".timeCompilation"                          /*qui salviamo il numero di compilazioni su di un file*/
 
 int getCountCompilation(char *nameFile) {
@@ -92,7 +92,7 @@ int  autoExeSw(char *nameFile) {
                 }
                 free(par);
             }
-        } else clearsCounter(nameFile);
+        } else clearsCounter(PATH_COUNT_COMPILATION);
         return FALSE;
     }
 }

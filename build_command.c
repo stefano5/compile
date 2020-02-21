@@ -28,6 +28,10 @@ void assign_name(char *name_file, char *name_output){
     }
 }
 
+int isDirectory(char *file) {
+    return existDirectory(file);
+}
+
 /*
  * Esaminiamo la directory "." e vediamo se esiste un unico file compatibile alla compilazione
  */
@@ -35,14 +39,19 @@ char *uniqueFile;       //qui scriviamo l'eventuale file compatibile alla compil
 int search_single_file() {
     read_directory(".");
     int numberFile=0;
+    PRINT_IF_DEBUG_ON("##### Ricerca automatica di un singolo file da compilare:\n");
     for (int i=0; i< Directory.n_file; i++) {
         char *type =(char*)memchr(Directory.name[i], '.', strlen(Directory.name[i]));
         if (type == NULL) continue; //perchè il file guardato non ha nessuna estensione 
-        if(debug()) printf("Vedo il file %s\n", Directory.name[i]);
+        PRINT_IF_DEBUG_ON("Vedo il file %s\n", Directory.name[i]);
         if (!strcmp(type, ".c") || !strcmp(type, ".c++") || !strcmp(type, ".cpp") || !strcmp(type, DISABLE_JAVA) || !strcmp(type, ".cc")) {
-            printf_d("\tE riconosco che ha una estensione nota\n");
-            if (numberFile==0) {
-                printf_d("\t\tEd e' il primo che trovo [mi aspetto una sola stampa]\n");
+            PRINT_IF_DEBUG_ON("\tE riconosco che ha una estensione nota\n");
+            if (isDirectory(Directory.name[i])) { 
+                PRINT_IF_DEBUG_ON("Il file %s e' una directory, quindi non lo considero\n", Directory.name[i]);
+                continue;
+            }
+            if (numberFile == 0) {
+                printf_d("\t\tEd e' il primo che trovo\n");
                 uniqueFile = (char*)malloc(strlen(Directory.name[i]) + 1);
                 strcpy(uniqueFile, Directory.name[i]);
                 numberFile++;
@@ -53,6 +62,23 @@ int search_single_file() {
         }
     }
     return numberFile;
+}
+
+int count_compatible_file(char **fileToCompile) {
+    int countCompatibleFile=0;
+    for (int i=0; i< Directory.n_file; i++) {
+        char *type =(char*)memchr(Directory.name[i], '.', strlen(Directory.name[i]));
+        if (type == NULL) continue;
+        if (!strcmp(type, ".c") || !strcmp(type, ".c++") || !strcmp(type, ".cpp") || !strcmp(type, DISABLE_JAVA) || !strcmp(type, ".cc")) {
+            if (containMainFunction(Directory.name[i])) {
+                *fileToCompile = (char*)malloc(strlen(Directory.name[i]) + 1);
+                initArray_str(*fileToCompile, strlen(Directory.name[i]) + 1);
+                strcpy(*fileToCompile, Directory.name[i]);
+                countCompatibleFile++;
+            }
+        }
+    }
+    return countCompatibleFile;
 }
 
 void disableCompilationAttempts() {
