@@ -102,7 +102,7 @@ void writeIntoFileCommand(char *cmd) {
 
     sprintf(path, "/home/%s/.compile_lastCommand.txt", user);
 
-    sprintf(text, "%s \t\tgenerated at: %s\t\ton %s\n", cmd, getTime(), cwd);
+    sprintf(text, "%s \t\tgenerated on: %s\t\ton %s\n", cmd, getTime(), cwd);
 
     writeFile(path, text, "a+");
 
