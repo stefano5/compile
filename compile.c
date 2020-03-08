@@ -38,7 +38,11 @@ static inline void create_command(char *cmd, char *fileToCompile, int compile_to
         howColor = 5;
         sprintf(cmd, "javac %s", fileToCompile);
     } else {
-        printf("Formato [%s] non supportato, rip\n", type);
+        errorMessage("");
+        if (language == ENGLISH) 
+            printf("Format [%s] non supported\n", type);
+        else
+            printf("Formato [%s] non supportato\n", type);
         exit(EXIT_FAILURE);
     }
 
