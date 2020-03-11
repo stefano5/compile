@@ -109,9 +109,13 @@ int addLibrary(char *param) {
 
     if (param[0] == '-' && param[1] == 'l') {    //Da versione 3 e superiore questa condizione non è più verificabile
         //ho scritto, ad esempio, -lpthread quindi sono stato bravo e metto tutto nel file
-        sprintf(lib , "%s %s", lib, param);
+        strcat(lib, " ");
+        strcat(lib, param);
+        //sprintf(lib , "%s %s", lib, param);
     } else if (param[0] != 'l') {
-        sprintf(lib, "%s -l%s", lib, param);
+        strcat(lib, " -l");
+        strcat(lib, param);
+        //sprintf(lib, "%s -l%s", lib, param);
     } else {
         if (language == ENGLISH)
             printf("Parameter '%s' its undefined. Please give me '-h' parameter to get help\n", param);

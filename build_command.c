@@ -19,7 +19,10 @@ int containMainFunction(char *nameFile) {
 
 //Aggiunge una o piu' macro passate come parametro/i in compilazione
 void addMacro(char *mcr) {
-    sprintf(macro, "%s -D%s ", macro, mcr);
+    strcat(macro, " -D");
+    strcat(macro, mcr);
+    strcat(macro, " ");
+    //sprintf(macro, "%s -D%s ", macro, mcr);
 }
 
 void assign_name(char *name_file, char *name_output){

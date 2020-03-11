@@ -169,8 +169,8 @@ void runCommand(char *cmd, char *fileToCompile, int compile_to_debug, char *type
             //readLibrary(library, 512);
             create_command(command, fileToCompile, 1, type, name_output, library, macro);
         }
-
-        sprintf(command, "%s && echo 1 > .successful", command);
+        //sprintf(command, "%s && echo 1 > .successful", command);
+        strcat(command, " && touch .successful");
     }
 }
 
@@ -242,7 +242,9 @@ int tryToForce(char **fileToCompile, char **newTipe) {
             for (int i=0; i< Directory.n_file; i++) {
                 //printf("file: %s\n", Directory.name[i]);
                 if (!strcmp(Directory.name[i], mainFile)) continue;
-                sprintf(*fileToCompile, "%s %s", *fileToCompile, Directory.name[i]);
+                strcat(*fileToCompile, " ");
+                strcat(*fileToCompile, Directory.name[i]);
+                //sprintf(*fileToCompile, "%s %s", *fileToCompile, Directory.name[i]);
             }
             return TRUE;
         case 0:
