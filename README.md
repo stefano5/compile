@@ -7,9 +7,9 @@
     $ compile -h
     
 All done. So, you have to run the 'install.sh' script.
-After the last command you should see the help message. Use those to get info!
+After the last command you should see the help message. Use it to get info!
 
-To change language use this command:
+To change language (en/ita) use this command:
 
     $ compile --set --select-language
     
@@ -25,6 +25,6 @@ To change language use this command:
 Tutto fatto. Quindi è bastato eseguire lo scipt 'install.sh'.
 Dopo l'ultimo comando dovresti vedere la guida. Usala per eventuali info.
 
-Per cambiare la lingua usa il comando:
+Per cambiare la lingua (en/ita) usa il comando:
 
     $ compile --set --select-language
